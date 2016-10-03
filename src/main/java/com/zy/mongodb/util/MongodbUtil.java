@@ -10,6 +10,20 @@ import com.mongodb.client.MongoDatabase;
  */
 public class MongodbUtil {
      static MongoClient client=null;
+
+    /**
+     * 单例mongodbclient
+     *
+     * @return
+     */
+    public  static  MongoClient getClient(String host,String password,String user) {
+        if (client == null) {
+            synchronized (MongoClient.class) {
+                return client = new MongoClient(host,27017);
+            }
+        }
+            return client;
+    }
     /**
      * 使用用户名、密码连接指定的database
      * @param host
@@ -18,9 +32,9 @@ public class MongodbUtil {
      * @param password
      * @return
      */
+
     public static  MongoDatabase getMongodbDataBase(String host,String database,String name,String password){
-        client=new MongoClient(host,27017);
-        MongoDatabase mongoDatabase =client.getDatabase(database);
+        MongoDatabase mongoDatabase =getClient(host,name,password).getDatabase(database);
         return mongoDatabase;
 
     }

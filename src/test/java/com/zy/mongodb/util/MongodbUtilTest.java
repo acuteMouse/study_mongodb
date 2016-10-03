@@ -1,6 +1,7 @@
 package com.zy.mongodb.util;
 
 import com.mongodb.Block;
+import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
@@ -98,6 +99,16 @@ public class MongodbUtilTest {
     @Test
     public void update(){
         stud.updateOne(eq("i",1),set("i",13333));
+    }
+
+    /**
+     * 单例 mongoclient
+     */
+    @Test
+    public void testSingole(){
+        MongoClient client=MongodbUtil.getClient("localhost","root","root");
+        MongoClient client1=MongodbUtil.getClient("localhost","root","root");
+        Assert.assertEquals(client,client1);
     }
 }
 
