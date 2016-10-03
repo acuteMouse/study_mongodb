@@ -9,23 +9,46 @@ import com.mongodb.client.MongoDatabase;
  * 作用:
  */
 public class MongodbUtil {
-     static MongoClient client=null;
+    static MongoClient client = null;
+    static final String DEFAULT_HOST = "localhost";
+    static final int DEFAULT_PORT = 27017;
 
     /**
-     * 单例mongodbclient
+     * 连接本地数据库
      *
      * @return
      */
-    public  static  MongoClient getClient(String host,String password,String user) {
+    public static MongoClient getDefaultClient() {
+        return getClient(DEFAULT_HOST, null, null, null);
+    }
+
+    /**
+     * 连接指定host
+     *
+     * @param host
+     * @return
+     */
+    public static MongoClient getClientWithHost(String host) {
+        return getClient(host, null, null, null);
+    }
+
+    /**
+     * 单例mongodbclient,双锁,连接默认端口27017,最底层
+     *
+     * @return
+     */
+    public static MongoClient getClient(String host, Long port, String userName, String password) {
         if (client == null) {
             synchronized (MongoClient.class) {
-                return client = new MongoClient(host,27017);
+                if (client == null) return client = new MongoClient(host, DEFAULT_PORT);
             }
         }
-            return client;
+        return client;
     }
+
     /**
      * 使用用户名、密码连接指定的database
+     *
      * @param host
      * @param database
      * @param name
@@ -33,35 +56,34 @@ public class MongodbUtil {
      * @return
      */
 
-    public static  MongoDatabase getMongodbDataBase(String host,String database,String name,String password){
-        MongoDatabase mongoDatabase =getClient(host,name,password).getDatabase(database);
+    public static MongoDatabase getMongodbDataBase(String host, String database, String name, String password) {
+        MongoDatabase mongoDatabase = getClient(host, null, null, null).getDatabase(database);
         return mongoDatabase;
 
     }
 
     /**
      * 默认连接，不实用用户名和密码
-     * @param host 主机ip
+     *
+     * @param host     主机ip
      * @param database 数据库名
      * @return
      */
-    public static  MongoDatabase getMongodbDataBase(String host,String database){
-        client=new MongoClient(host,27017);
-        MongoDatabase mongoDatabase =client.getDatabase(database);
-        return mongoDatabase;
+    public static MongoDatabase getMongodbDataBase(String host, String database) {
+        return getClientWithHost(host).getDatabase(database);
     }
 
     /**
      * 获取本地mongodb数据库
+     *
      * @param database 数据库名
      * @return
      */
-    public static  MongoDatabase getDefaultMongodbDataBase(String database){
-        client=new MongoClient("localhost",27017);
-        MongoDatabase mongoDatabase =client.getDatabase(database);
-        return mongoDatabase;
+    public static MongoDatabase getDefaultMongodbDataBase(String database) {
+        return getDefaultClient().getDatabase(database);
     }
-    public void closeConnection(){
+
+    public void closeConnection() {
         client.close();
     }
 }

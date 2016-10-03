@@ -93,22 +93,55 @@ public class MongodbUtilTest {
         }
         stud.insertMany(documents);
     }
+
     /**
      * 修改某个值
      */
     @Test
-    public void update(){
-        stud.updateOne(eq("i",1),set("i",13333));
+    public void update() {
+        stud.updateOne(eq("i", 1), set("i", 13333));
     }
 
     /**
      * 单例 mongoclient
      */
+    MongoClient client2 = null;
+    MongoClient client3 = null;
+    MongoClient client4 = null;
+
     @Test
-    public void testSingole(){
-        MongoClient client=MongodbUtil.getClient("localhost","root","root");
-        MongoClient client1=MongodbUtil.getClient("localhost","root","root");
-        Assert.assertEquals(client,client1);
+    public void testSingole() throws InterruptedException {
+//        MongoClient client=MongodbUtil.getDefaultClient();
+//        MongoClient client1=MongodbUtil.getDefaultClient();
+//        Assert.assertEquals(client,client1);
+        //开启三个线程来测试 多线程模式下单例是否仍然有效
+        Thread t1 = new Thread(() -> {
+            client2 = MongodbUtil.getDefaultClient();
+
+        });
+        Thread t2 = new Thread(() -> {
+            client3 = MongodbUtil.getDefaultClient();
+            try {
+                t1.start();
+                t1.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        Thread t3 = new Thread(() -> {
+            client4 = MongodbUtil.getDefaultClient();
+            try {
+                t2.start();
+                t2.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        });
+        t3.start();
+        t3.join();
+        Assert.assertEquals(client2, client3);
+        Assert.assertEquals(client2, client4);
     }
 }
 
